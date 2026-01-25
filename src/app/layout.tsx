@@ -4,6 +4,7 @@ import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer"; 
 import { CartProvider } from "@/context/CartContext"; 
+import Separator from "@/components/Separator";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -30,6 +31,7 @@ export default function RootLayout({
         <CartProvider>
           
           <Header />
+          <Separator />
           {children}
           <Footer />
 
