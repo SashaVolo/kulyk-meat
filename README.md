@@ -1,36 +1,31 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🥩 М'ясна Майстерня "Братів Куликів"
 
-## Getting Started
+Сучасний E-commerce веб-сайт для сімейного бізнесу з продажу крафтових м'ясних делікатесів. Проект реалізовано з використанням **Next.js 14** для фронтенду та **Sanity.io** як Headless CMS для керування контентом.
 
-First, run the development server:
+![Logo](./public/lg3.png)
+*(Або сюди можна вставити скріншот головної сторінки)*
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 🚀 Технологічний стек
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **Framework:** [Next.js 14](https://nextjs.org/) (App Router)
+- **Language:** TypeScript
+- **Styling:** [Tailwind CSS](https://tailwindcss.com/)
+- **CMS (Database):** [Sanity.io](https://www.sanity.io/)
+- **State Management:** React Context API (для кошика)
+- **Forms & Validation:** React Hook Form / Custom validation
+- **Notifications:** Telegram Bot API + Nodemailer (Email)
+- **Deployment:** Vercel
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## ✨ Функціонал
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Для клієнта:
+- 🛍️ **Каталог товарів** з фільтрацією за категоріями.
+- 🛒 **Кошик** (зберігається в LocalStorage, не зникає після оновлення).
+- 📱 **Адаптивний дизайн** (Mobile-first).
+- 📝 **Оформлення замовлення** з валідацією українського номера телефону (+380).
+- 📍 **Контакти** з інтегрованою картою.
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Для адміністратора:
+- 🔐 **Прихована адмін-панель** на сайті (`/admin`) із захистом PIN-кодом.
+- 📦 **Перегляд замовлень** у реальному часі (статус, товари, сума).
+- ✏️ **Зручне редагування товарів** через Sanity Studio (`/studio`).
