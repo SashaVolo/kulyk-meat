@@ -13,7 +13,6 @@
 - **CMS (Database):** [Sanity.io](https://www.sanity.io/)
 - **State Management:** React Context API (для кошика)
 - **Forms & Validation:** React Hook Form / Custom validation
-- **Notifications:** Telegram Bot API + Nodemailer (Email)
 - **Deployment:** Vercel
 
 ## ✨ Функціонал
