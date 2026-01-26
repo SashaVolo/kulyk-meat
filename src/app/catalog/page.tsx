@@ -16,7 +16,7 @@ async function getProducts() {
   
   return await client.fetch(query);
 }
-
+export const revalidate = 60;
 export default async function CatalogPage() {
   // Отримуємо дані з Sanity
   const products = await getProducts();
