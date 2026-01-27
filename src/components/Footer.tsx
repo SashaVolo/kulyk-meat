@@ -31,8 +31,8 @@ export default function Footer() {
             
             <div>
               <p className="text-gray-400 text-sm mb-1">Замовити смаколики:</p>
-              <a href="tel:+380983889435" className="text-2xl font-heading font-bold text-white hover:text-[#D02020] transition">
-                +38(098) 388 94 35
+              <a href="tel:+380689396142" className="text-2xl font-heading font-bold text-white hover:text-[#D02020] transition">
+                +38 (068) 939 61 42
               </a>
             </div>
 

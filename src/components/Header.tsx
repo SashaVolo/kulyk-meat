@@ -9,8 +9,8 @@ export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { items } = useCart();
 
-  const phoneNumber = "+380983889435";
-  const formattedPhone = "+38 (098) 388 94 35";
+  const phoneNumber = "+380689396142";
+  const formattedPhone = "+38 (068) 939 61 42";
 
   return (
     <header className="bg-white sticky top-0 z-[100] border-b border-gray-100 shadow-sm">

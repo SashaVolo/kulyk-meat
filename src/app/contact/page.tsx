@@ -25,8 +25,8 @@ export default function ContactPage() {
               </div>
               <div>
                 <h3 className="text-xl font-bold uppercase mb-2">Замовити по телефону</h3>
-                <a href="tel:+380983889435" className="text-2xl font-heading font-bold text-gray-800 hover:text-[#D02020] transition">
-                  +38 (098) 388 94 35
+                <a href="tel:+380689396142" className="text-2xl font-heading font-bold text-gray-800 hover:text-[#D02020] transition">
+                  +38 (068) 939 61 42
                 </a>
                 <p className="text-gray-500 mt-2">Приймаємо дзвінки з 9:00 до 20:00</p>
               </div>
