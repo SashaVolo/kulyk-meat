@@ -3,31 +3,37 @@
 import { useCart } from "@/context/CartContext";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { urlFor } from "@/sanity/lib/image";
 
 export default function CartPage() {
+  // 👇 ВИПРАВЛЕНО: використовуємо items та totalPrice (як у вашому контексті)
   const { items, removeFromCart, totalPrice, clearCart } = useCart();
   
-  // Початкове значення телефону одразу з кодом
+  const [isClient, setIsClient] = useState(false);
   const [formData, setFormData] = useState({ name: "", phone: "+380" });
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
 
-  // Обробка введення телефону
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient) return null;
+
+  // Захист: якщо items не існує, використовуємо порожній масив
+  const safeItems = items || [];
+
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     
-    // Якщо користувач намагається стерти "+380", не даємо йому це зробити
     if (!val.startsWith("+380")) {
       setFormData({ ...formData, phone: "+380" });
       return;
     }
 
-    // Дозволяємо вводити тільки цифри після плюса
-    // Регулярка: залишаємо тільки цифри та один плюс на початку
     const cleanVal = "+" + val.slice(1).replace(/\D/g, "");
     
-    // Обмежуємо довжину (13 символів: +380 XX XXX XX XX)
     if (cleanVal.length <= 13) {
       setFormData({ ...formData, phone: cleanVal });
     }
@@ -37,8 +43,6 @@ export default function CartPage() {
     e.preventDefault();
     setErrorMsg("");
 
-    // ВАЛІДАЦІЯ ТЕЛЕФОНУ
-    // Має бути 13 символів (+380...)
     if (formData.phone.length !== 13) {
       setErrorMsg("Будь ласка, введіть повний номер телефону");
       return;
@@ -52,8 +56,8 @@ export default function CartPage() {
         body: JSON.stringify({
           name: formData.name,
           phone: formData.phone,
-          items: items,
-          total: totalPrice
+          items: safeItems,
+          total: totalPrice // Використовуємо totalPrice
         })
       });
 
@@ -85,7 +89,7 @@ export default function CartPage() {
     );
   }
 
-  if (items.length === 0) {
+  if (safeItems.length === 0) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4">
         <h1 className="text-3xl font-bold mb-4">Кошик порожній</h1>
@@ -103,28 +107,48 @@ export default function CartPage() {
         
         <div className="grid lg:grid-cols-3 gap-8">
           
-          {/* СПИСОК ТОВАРІВ */}
           <div className="lg:col-span-2 space-y-4">
-            {items.map((item) => (
-              <div key={item.uniqueId} className="bg-white p-4 rounded-xl flex items-center gap-4 shadow-sm">
-                <div className="relative w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-                  <Image src={item.image} alt={item.title} fill className="object-cover" />
+            {safeItems.map((item) => {
+              // --- ЛОГІКА ОБРОБКИ КАРТИНКИ (Щоб не ламалося) ---
+              let imageUrl = null;
+              
+              if (item.image) {
+                if (typeof item.image === 'string') {
+                  imageUrl = item.image;
+                } else if (typeof item.image === 'object') {
+                  try {
+                    imageUrl = urlFor(item.image).url();
+                  } catch (e) {
+                    imageUrl = null;
+                  }
+                }
+              }
+              // ------------------------------------------------
+
+              return (
+                <div key={item.uniqueId} className="bg-white p-4 rounded-xl flex items-center gap-4 shadow-sm">
+                  <div className="relative w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                    {imageUrl ? (
+                      <Image src={imageUrl} alt={item.title} fill className="object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400 text-xs">No Photo</div>
+                    )}
+                  </div>
+                  <div className="flex-grow">
+                    <h3 className="font-bold text-lg">{item.title}</h3>
+                    <p className="text-gray-500">{item.price} ₴ x {item.quantity}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-bold text-lg mb-2">{item.price * item.quantity} ₴</p>
+                    <button onClick={() => removeFromCart(item.uniqueId)} className="text-red-500 text-sm hover:underline">
+                      Видалити
+                    </button>
+                  </div>
                 </div>
-                <div className="flex-grow">
-                  <h3 className="font-bold text-lg">{item.title}</h3>
-                  <p className="text-gray-500">{item.price} ₴ x {item.quantity}</p>
-                </div>
-                <div className="text-right">
-                  <p className="font-bold text-lg mb-2">{item.price * item.quantity} ₴</p>
-                  <button onClick={() => removeFromCart(item.uniqueId)} className="text-red-500 text-sm hover:underline">
-                    Видалити
-                  </button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
-          {/* ФОРМА ЗАМОВЛЕННЯ */}
           <div className="bg-white p-6 rounded-2xl shadow-sm h-fit sticky top-24">
             <h2 className="text-xl font-bold mb-6">Ваші дані</h2>
             <form onSubmit={handleSubmit} className="space-y-4">

@@ -41,6 +41,12 @@ export default defineType({
       type: 'text',
     }),
     defineField({
+      name: 'ingredients',
+      title: 'Склад продукту',
+      type: 'text',
+      description: 'Наприклад: М\'ясо свинини, сіль, перець, гірчиця',
+    }),
+    defineField({
       name: 'weight',
       title: 'Вага (напр: "за 1 кг")',
       type: 'string',
