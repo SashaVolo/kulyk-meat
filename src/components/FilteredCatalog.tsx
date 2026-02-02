@@ -4,12 +4,11 @@ import { useState } from "react";
 import ProductCard from "@/components/ProductCard";
 import { urlFor } from "@/sanity/lib/image";
 
-// Тип для товару з Sanity
 interface SanityProduct {
   _id: string;
   title: string;
   price: number;
-  image: any;
+  image: any; 
   category: string;
   weight: string;
   isHit: boolean;
@@ -21,25 +20,20 @@ interface Props {
 }
 
 export default function FilteredCatalog({ products }: Props) {
-  // Стан фільтру
   const [filter, setFilter] = useState("all");
 
-  // Логіка фільтрації
   const filteredProducts = filter === "all" 
     ? products 
     : products.filter(p => p.category === filter);
 
   return (
     <div>
-      {/* Кнопки фільтрів */}
       <div className="flex justify-center gap-4 mb-12 flex-wrap">
         <FilterButton 
             label="Всі товари" 
             isActive={filter === "all"} 
             onClick={() => setFilter("all")} 
         />
-        
-
         <FilterButton 
             label="М'ясні делікатеси" 
             isActive={filter === "meat"} 
@@ -49,22 +43,32 @@ export default function FilteredCatalog({ products }: Props) {
 
       {/* Сітка товарів */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-        {filteredProducts.map((product) => (
-          <ProductCard 
-            key={product._id}
-            id={product._id}
-            title={product.title}
-            price={product.price}
-            weight={product.weight || "за 1 кг"}
-            // Обробка картинки Sanity
-            image={product.image ? urlFor(product.image).url() : '/b1.jpg'}
-            isHit={product.isHit}
-            isSpicy={product.isSpicy}
-          />
-        ))}
+        {filteredProducts.map((product) => {
+          let imageUrl = '/b1.jpg'; // Заглушка
+          
+          if (product.image) {
+            try {
+              imageUrl = urlFor(product.image).url();
+            } catch (e) {
+              console.error("Помилка генерації URL картинки для:", product.title);
+            }
+          }
+
+          return (
+            <ProductCard 
+              key={product._id}
+              id={product._id}
+              title={product.title}
+              price={product.price}
+              weight={product.weight || "за 1 кг"}
+              image={imageUrl}
+              isHit={product.isHit}
+              isSpicy={product.isSpicy}
+            />
+          );
+        })}
       </div>
 
-      {/* Якщо пусто */}
       {filteredProducts.length === 0 && (
         <div className="text-center py-20 text-gray-400">
           У цій категорії поки що пусто...
@@ -73,7 +77,6 @@ export default function FilteredCatalog({ products }: Props) {
     </div>
   );
 }
-
 
 function FilterButton({ label, isActive, onClick }: { label: string, isActive: boolean, onClick: () => void }) {
   return (

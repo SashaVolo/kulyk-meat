@@ -18,14 +18,6 @@ export default defineType({
       validation: (rule) => rule.required().min(0),
     }),
     defineField({
-      name: 'image',
-      title: 'Фото',
-      type: 'image',
-      options: {
-        hotspot: true, // Дозволяє обрізати фото
-      },
-    }),
-    defineField({
       name: 'category',
       title: 'Категорія',
       type: 'string',
@@ -34,6 +26,35 @@ export default defineType({
           { title: 'М\'ясо', value: 'meat' },
         ],
       },
+    }),
+    defineField({
+      name: 'gallery',
+      title: 'Галерея (Фото та Відео)',
+      description: 'Перше фото буде головним у каталозі.',
+      type: 'array',
+      of: [
+        // Дозволяємо фото
+        {
+          type: 'image',
+          options: { hotspot: true },
+          fields: [
+             {
+               name: 'alt',
+               title: 'Опис фото (для сліпих та Google)',
+               type: 'string',
+             }
+          ]
+        },
+        // Дозволяємо відео файли
+        {
+          type: 'file',
+          title: 'Відео файл',
+          options: { accept: 'video/*' }
+        }
+      ],
+      options: {
+        layout: 'grid'
+      }
     }),
     defineField({
       name: 'description',

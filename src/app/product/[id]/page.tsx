@@ -1,20 +1,21 @@
 import { client } from "@/sanity/lib/client";
-import { urlFor } from "@/sanity/lib/image";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import AddToCartButton from "@/components/AddCartButton";
 import BadgePopup from "@/components/BadgePopup";
+import ProductGallery, { GalleryItem } from "@/components/ProductGallery";
+
+export const revalidate = 60;
 
 interface Product {
   _id: string;
   title: string;
   price: number;
-  image: any;
   description: string;
   weight: string;
   category: string;
   ingredients?: string;
+  gallery: GalleryItem[];
 }
 
 async function getProduct(id: string) {
@@ -22,11 +23,18 @@ async function getProduct(id: string) {
     _id,
     title,
     price,
-    image,
     description,
     weight,
     category,
-    ingredients
+    ingredients,
+    gallery[]{
+      _key,
+      _type,
+      asset,
+      _type == "file" => {
+        "videoUrl": asset->url
+      }
+    }
   }`;
 
   return await client.fetch(query, { id });
@@ -41,76 +49,54 @@ export default async function ProductPage(props: Props) {
   const id = params.id;
   const product: Product = await getProduct(id);
 
-  if (!product) {
-    return notFound();
-  }
+  if (!product) return notFound();
+
+  const galleryItems = product.gallery || [];
+  const firstImage = galleryItems.find(item => item._type === 'image');
+  
+  const productForCart = {
+    ...product,
+    image: firstImage ? firstImage.asset : null
+  };
 
   return (
     <main className="min-h-screen bg-white py-12 md:py-20">
       <div className="container mx-auto px-4">
         <div className="text-sm breadcrumbs text-gray-500 mb-8 flex items-center flex-wrap">
-          <Link href="/" className="hover:text-[#D02020] transition">
-            Головна
-          </Link>
+          <Link href="/" className="hover:text-[#D02020] transition">Головна</Link>
           <span className="mx-2">/</span>
-          <Link href="/catalog" className="hover:text-[#D02020] transition">
-            Каталог
-          </Link>
+          <Link href="/catalog" className="hover:text-[#D02020] transition">Каталог</Link>
           <span className="mx-2">/</span>
           <span className="text-black font-medium">{product.title}</span>
         </div>
 
         <div className="grid md:grid-cols-2 gap-12 items-start">
           
-          {/* ЛІВА КОЛОНКА - ФОТО */}
-          <div className="relative aspect-square w-full rounded-3xl overflow-hidden bg-gray-100 shadow-xl border border-gray-200">
-            
-            <BadgePopup />
-
-            {product.image ? (
-              <Image
-                src={urlFor(product.image).url()}
-                alt={product.title}
-                fill
-                className="object-cover"
-                priority
-              />
-            ) : (
-              <div className="flex items-center justify-center w-full h-full text-gray-300">
-                Немає фото
-              </div>
-            )}
+          <div className="relative w-full">
+            <div className="absolute top-4 left-4 z-30">
+               <BadgePopup />
+            </div>
+            <ProductGallery items={galleryItems} title={product.title} />
           </div>
 
-          {/* ПРАВА КОЛОНКА - ІНФО */}
           <div className="flex flex-col gap-6">
             <div>
               <span className="text-xs font-bold text-[#D02020] uppercase tracking-widest mb-2 block">
-                {product.category === "kovbasa"
-                  ? "Ковбаса"
-                  : "М'ясні делікатеси"}
+                {product.category === "kovbasa" ? "Ковбаса" : "М'ясні делікатеси"}
               </span>
               <h1 className="text-4xl md:text-5xl font-heading font-bold text-black uppercase leading-tight">
                 {product.title}
               </h1>
             </div>
 
-            {/* ЦІНА */}
             <div className="flex items-baseline gap-2">
-              <span className="text-4xl font-bold text-[#D02020]">
-                {product.price}
-              </span>
-              <span className="text-2xl font-bold text-[#D02020]">
-                грн
-              </span>
-              <span className="text-gray-500 font-medium ml-2">
-                {product.weight || "за 1 кг"}
-              </span>
+              <span className="text-4xl font-bold text-[#D02020]">{product.price}</span>
+              <span className="text-2xl font-bold text-[#D02020] border-b-2 border-[#D02020] pb-1">грн</span>
+              <span className="text-gray-500 font-medium ml-2">{product.weight || "за 1 кг"}</span>
             </div>
 
-            {/* КНОПКА (Піднята вище) */}
             <div className="py-2">
-              <AddToCartButton product={product} large={true} />
+              <AddToCartButton product={productForCart} large={true} />
               <p className="text-gray-400 text-sm mt-3 text-center md:text-left">
                 * Менеджер уточнить вагу та деталі доставки по телефону
               </p>
@@ -119,36 +105,20 @@ export default async function ProductPage(props: Props) {
             <div className="h-px w-full bg-gray-200 my-2"></div>
 
             <div className="space-y-4 text-gray-700">
-              <p className="text-lg leading-relaxed">
-                {product.description || "Опис цього смаколику скоро з'явиться..."}
-              </p>
+              <p className="text-lg leading-relaxed">{product.description}</p>
 
-              {/* Блок Натуральний продукт */}
               <div className="bg-gray-50 p-6 rounded-xl border border-gray-100">
                 <h3 className="font-bold text-black mb-2 uppercase text-sm tracking-wider flex items-center gap-2">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                    className="w-5 h-5 text-[#D02020]"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1 1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z"
-                    />
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-[#D02020]">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1 1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" />
                   </svg>
                   Натуральний продукт
                 </h3>
                 <p className="text-sm italic opacity-80">
-                  Тільки добірне м'ясо, сіль, натуральні спеції та фруктовий
-                  дим. Жодних штучних домішок.
+                  Тільки добірне м'ясо, сіль, натуральні спеції та фруктовий дим. Жодних штучних домішок.
                 </p>
               </div>
 
-              {/* Блок Склад */}
               {product.ingredients && (
                 <div className="bg-gray-50 p-6 rounded-xl border border-gray-100">
                    <h3 className="font-bold text-black mb-2 uppercase text-sm tracking-wider flex items-center gap-2">
@@ -157,17 +127,12 @@ export default async function ProductPage(props: Props) {
                      </svg>
                      Склад
                    </h3>
-                   <p className="text-sm italic opacity-80">
-                     {product.ingredients}
-                   </p>
+                   <p className="text-sm italic opacity-80">{product.ingredients}</p>
                 </div>
               )}
 
-              {/* Блок Доставка (Новий) */}
               <div className="border-2 border-green-600 bg-green-50/50 p-4 rounded-xl mt-4">
-                <h3 className="font-bold text-black text-sm uppercase mb-2">
-                  Доставка та оплата
-                </h3>
+                <h3 className="font-bold text-black text-sm uppercase mb-2">Доставка та оплата</h3>
                 <p className="text-sm text-gray-700 leading-snug">
                   Оскільки це свіжа крафтова продукція, реальна дата відправки може зміститися на 
                   <span className="font-bold"> 5-7 днів </span> 

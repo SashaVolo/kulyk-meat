@@ -2,9 +2,22 @@ import ProductCard from "./ProductCard";
 import { client } from "@/sanity/lib/client";
 import { urlFor } from "@/sanity/lib/image";
 
+
+export const revalidate = 0;
+
 async function getProducts() {
-  // Беремо тільки 4 перші товари для прев'ю
-  return await client.fetch(`*[_type == "product"][0...4]`);
+
+  const query = `*[_type == "product"] | order(_createdAt desc)[0...4] {
+    _id,
+    title,
+    price,
+    weight,
+    isHit,
+    isSpicy,
+    "image": gallery[_type == "image"][0]
+  }`;
+
+  return await client.fetch(query);
 }
 
 export default async function Catalog() {
