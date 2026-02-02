@@ -14,7 +14,7 @@ export default function BadgePopup() {
         title="Натисніть, щоб збільшити"
       >
         <Image 
-          src="/icon.png" 
+          src="/icon1.png" 
           alt="Натуральне копчення" 
           fill 
           className="object-contain drop-shadow-md"
